@@ -1,0 +1,4 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "ansible.python.interpreterPath": "/home/student/application/.venv/bin/python"
+}
