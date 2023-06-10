@@ -1,32 +1,57 @@
-from fastapi import FastAPI
-import json
+import re
 from datetime import datetime, timedelta
+from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/get_threat_value")
-async def get_threat_value():
+@app.get("/get_alerts")
+async def get_alerts():
+    alert_list = []
+    with open("/var/log/snort/alert", "r") as f:
+        for line in f:
+            pattern = r'(\d{2}\/\d{1,2}-\d{2}:\d{2}:\d{2}\.\d{6}).{10}(\d+).+?\]\s(.*?)\s\[\*{2}\]\s\[Classification:\s(.*?)\]\s\[Priority:\s(.*?)\]\s\{(.*?)\}\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)\s->\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)'
+            matches = re.match(pattern, line)
+            if matches:
+                timestamp = datetime.strptime(str(datetime.now().year) + "/" + matches.group(1), "%Y/%m/%d-%H:%M:%S.%f").isoformat()
+                rule_id = matches.group(2)
+                description = matches.group(3)
+                classification = matches.group(4)
+                priority = matches.group(5)
+                protocol = matches.group(6)
+                src_addr = matches.group(7)
+                src_port = matches.group(8)
+                targ_addr = matches.group(9)
+                targ_port = matches.group(10)
+                alert_list.append({"timestamp": timestamp, "rule_id": rule_id, "description": description, "classification": classification, "priority": priority, "protocol": protocol, "src_addr": src_addr, "src_port": src_port, "targ_addr": targ_addr, "targ_port": targ_port})
+            elif re.match(r'(\d{2}\/\d{1,2}-\d{2}:\d{2}:\d{2}\.\d{6}).{10}(\d+).+?\]\s(.*?)\s\[\*{2}\]\s\[Classification:\s(.*?)\]\s\[Priority:\s(.*?)\]\s\{(.*?)\}\s(.*)\s->\s(.*)', line):
+                matches = re.match(r'(\d{2}\/\d{1,2}-\d{2}:\d{2}:\d{2}\.\d{6}).{10}(\d+).+?\]\s(.*?)\s\[\*{2}\]\s\[Classification:\s(.*?)\]\s\[Priority:\s(.*?)\]\s\{(.*?)\}\s(.*)\s->\s(.*)', line)
+                timestamp = datetime.strptime(str(datetime.now().year) + "/" + matches.group(1), "%Y/%m/%d-%H:%M:%S.%f").isoformat()
+                rule_id = matches.group(2)
+                description = matches.group(3)
+                classification = matches.group(4)
+                priority = matches.group(5)
+                protocol = matches.group(6)
+                src_addr = matches.group(7)
+                targ_addr = matches.group(8)
+                alert_list.append({"timestamp": timestamp, "rule_id": rule_id, "description": description, "classification": classification, "priority": priority, "protocol": protocol, "src_addr": src_addr, "targ_addr": targ_addr})
+            else:
+                print("No match: " + line)
+    return alert_list
+
+@app.get("/get_current_threat_level")
+async def get_current_threat_level():
     current_time = datetime.now()
-    ten_minutes_ago = current_time - timedelta(minutes=10)
-
-    with open("alerts_db.json", "r") as file:
-        database = json.load(file)
-
-    filtered_data = []
-    for data in database:
-        if ten_minutes_ago <= datetime.fromisoformat(data["timestamp"]):
-            filtered_data.append(data)
-
+    ten_minutes_ago = current_time - timedelta(minutes=1)
     threat_value = 0
-
-    for alert in filtered_data:
-        if alert["priority"] == 1:
-            threat_value = threat_value + 10
-        elif alert["priority"] == 2:
-            threat_value = threat_value + 7
-        elif alert["priority"] == 3:
-            threat_value = threat_value + 4
-        else:
-            threat_value = threat_value + 1
-
+    alerts = await get_alerts()
+    for alert in alerts:
+        if ten_minutes_ago <= datetime.fromisoformat(alert["timestamp"]):
+            if alert["priority"] == 1:
+                threat_value = threat_value + 10
+            elif alert["priority"] == 2:
+                threat_value = threat_value + 7
+            elif alert["priority"] == 3:
+                threat_value = threat_value + 4
+            else:
+                threat_value = threat_value + 1
     return threat_value
