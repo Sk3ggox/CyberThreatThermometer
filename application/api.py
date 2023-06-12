@@ -48,12 +48,11 @@ async def get_count():
         "prio4": 0
     }
     for alert in alerts:
-        if alert["priority"] == 1:
+        if alert["priority"] == "1":
             prio_count["prio1"] = prio_count["prio1"] + 1
         elif alert["priority"] == "2":
-            print(alert["priority"])
             prio_count["prio2"] = prio_count["prio2"] + 1
-        elif alert["priority"] == 3:
+        elif alert["priority"] == "3":
             prio_count["prio3"] = prio_count["prio3"] + 1
         else:
             prio_count["prio4"] = prio_count["prio4"] + 1
@@ -67,22 +66,22 @@ async def get_current_threat_level():
     alerts = await get_alerts()
     for alert in alerts:
         if ten_minutes_ago <= datetime.fromisoformat(alert["timestamp"]):
-            if alert["priority"] == 1:
+            if alert["priority"] == "1":
                 threat_value = threat_value + 10
-            elif alert["priority"] == 2:
+            elif alert["priority"] == "2":
                 threat_value = threat_value + 7
-            elif alert["priority"] == 3:
+            elif alert["priority"] == "3":
                 threat_value = threat_value + 4
             else:
                 threat_value = threat_value + 1
-    threat_value_frac = convert_to_fraction(threat_value)
-    return threat_value_frac
+    #threat_value_frac = convert_to_fraction(threat_value)
+    return threat_value
 
-def convert_to_fraction(value):
-    if value <= 0:
-        return 0, 60
-    elif value >= 6000:
-        return 60, 60
-    else:
-        frac = value // 1000
-        return frac
+#def convert_to_fraction(value):
+#    if value <= 0:
+#        return 0, 60
+#    elif value >= 6000:
+#        return 60, 60
+#    else:
+#        frac = value // 1000
+#        return frac
