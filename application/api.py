@@ -54,4 +54,14 @@ async def get_current_threat_level():
                 threat_value = threat_value + 4
             else:
                 threat_value = threat_value + 1
-    return threat_value
+    threat_value_frac = convert_to_fraction(threat_value)
+    return threat_value_frac
+
+def convert_to_fraction(value):
+    if value <= 0:
+        return 0, 60
+    elif value >= 6000:
+        return 60, 60
+    else:
+        frac = value // 1000
+        return frac

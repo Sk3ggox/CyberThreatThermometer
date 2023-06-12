@@ -47,7 +47,7 @@ void loop() {
     HTTPClient http;
 
     Serial.print("[HTTP] begin...\n");
-    if (http.begin(client, "http://192.168.2.75/get_current_threat_level")) {  // HTTP
+    if (http.begin(client, "http://192.168.146.217/get_current_threat_level")) {  // HTTP
 
 
       Serial.print("[HTTP] GET...\n");
