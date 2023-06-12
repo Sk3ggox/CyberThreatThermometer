@@ -38,6 +38,26 @@ async def get_alerts():
                 print("No match: " + line)
     return alert_list
 
+@app.get("/get_count")
+async def get_count():
+    alerts = await get_alerts()
+    prio_count = {
+        "prio1": 0,
+        "prio2": 0,
+        "prio3": 0,
+        "prio4": 0
+    }
+    for alert in alerts:
+        if alert["priority"] == 1:
+            prio_count["prio1"] = prio_count["prio1"] + 1
+        elif alert["priority"] == 2:
+            prio_count["prio2"] = prio_count["prio2"] + 1
+        elif alert["priority"] == 3:
+            prio_count["prio3"] = prio_count["prio3"] + 1
+        else:
+            prio_count["prio4"] = prio_count["prio4"] + 1
+    return prio_count
+
 @app.get("/get_current_threat_level")
 async def get_current_threat_level():
     current_time = datetime.now()
