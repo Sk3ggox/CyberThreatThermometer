@@ -50,7 +50,7 @@ async def get_count():
     for alert in alerts:
         if alert["priority"] == 1:
             prio_count["prio1"] = prio_count["prio1"] + 1
-        elif alert["priority"] == 2:
+        elif alert["priority"] == "2":
             print(alert["priority"])
             prio_count["prio2"] = prio_count["prio2"] + 1
         elif alert["priority"] == 3:
