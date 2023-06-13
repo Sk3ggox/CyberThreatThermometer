@@ -67,21 +67,11 @@ async def get_current_threat_level():
     for alert in alerts:
         if ten_minutes_ago <= datetime.fromisoformat(alert["timestamp"]):
             if alert["priority"] == "1":
-                threat_value = threat_value + 10
+                threat_value = threat_value + 100
             elif alert["priority"] == "2":
                 threat_value = threat_value + 7
-            elif alert["priority"] == "3":
-                threat_value = threat_value + 4
-            else:
-                threat_value = threat_value + 1
-    #threat_value_frac = convert_to_fraction(threat_value)
-    return threat_value
-
-#def convert_to_fraction(value):
-#    if value <= 0:
-#        return 0, 60
-#    elif value >= 6000:
-#        return 60, 60
-#    else:
-#        frac = value // 1000
-#        return frac
+#            elif alert["priority"] == "3":
+#                threat_value = threat_value + 4
+#            else:
+#                threat_value = threat_value + 1
+    return threat_value // 100
