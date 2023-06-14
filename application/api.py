@@ -70,19 +70,13 @@ async def get_count():
     alerts = await get_alerts()
     prio_count = {
         "prio1": 0,
-        "prio2": 0,
-        "prio3": 0,
-        "prio4": 0
+        "prio2": 0
     }
     for alert in alerts:
         if alert["priority"] == "1":
             prio_count["prio1"] = prio_count["prio1"] + 1
         elif alert["priority"] == "2":
             prio_count["prio2"] = prio_count["prio2"] + 1
-        elif alert["priority"] == "3":
-            prio_count["prio3"] = prio_count["prio3"] + 1
-        else:
-            prio_count["prio4"] = prio_count["prio4"] + 1
     return prio_count
 
 @app.get("/get_current_threat_level")
@@ -94,11 +88,7 @@ async def get_current_threat_level():
     for alert in alerts:
         if ten_minutes_ago <= datetime.fromisoformat(alert["timestamp"]):
             if alert["priority"] == "1":
-                threat_value = threat_value + 100
+                threat_value = threat_value + 2
             elif alert["priority"] == "2":
-                threat_value = threat_value + 7
-#            elif alert["priority"] == "3":
-#                threat_value = threat_value + 4
-#            else:
-#                threat_value = threat_value + 1
-    return threat_value // 100
+                threat_value = threat_value + 1
+    return threat_value
