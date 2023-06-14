@@ -17,15 +17,18 @@ app.add_middleware(
 )
 
 def remove_lines():
-    threshold_time = datetime.now() - timedelta(minutes=4)
-    print(threshold_time)
+    max_age = timedelta(minutes=4)
+    now = datetime.now()
     pattern = r'(\d{2}\/\d{1,2}-\d{2}:\d{2}:\d{2}\.\d{6}).*'
-    
-    with open("/var/log/snort/alert", "r") as file, open("/var/log/snort/alert", "w") as file_write:
+    lines_to_keep = []
+
+    with open("/var/log/snort/alert", "r") as file:
         for line in file:
-            timestamp = datetime.strptime(str(datetime.now().year) + "/" + re.match(pattern, line).group(1), "%Y/%m/%d-%H:%M:%S.%f").isoformat()
-            if timestamp < threshold_time.isoformat():
-                file_write.write(line)
+            line_time = datetime.strptime(str(datetime.now().year) + "/" + re.match(pattern, line).group(1), "%Y/%m/%d-%H:%M:%S.%f")
+            if (now - line_time) <= max_age:
+                lines_to_keep.append(line)
+    with open("/var/log/snort/alert", "w") as file_write:
+        file_write.writelines(lines_to_keep)
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(remove_lines, 'interval', minutes=1)
