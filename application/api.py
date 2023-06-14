@@ -24,7 +24,7 @@ def remove_lines():
     with open("/var/log/snort/alert", "r") as file, open("/var/log/snort/alert", "w") as file_write:
         for line in file:
             timestamp = datetime.strptime(str(datetime.now().year) + "/" + re.match(pattern, line).group(1), "%Y/%m/%d-%H:%M:%S.%f").isoformat()
-            if timestamp > threshold_time.isoformat():
+            if timestamp < threshold_time.isoformat():
                 file_write.write(line)
 
 scheduler = BackgroundScheduler()
