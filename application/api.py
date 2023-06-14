@@ -18,7 +18,7 @@ app.add_middleware(
 
 def remove_old_alerts():
     script_path = "/home/student/CyberThreatThermometer/application/remove_lines.py"
-    file_path = "/var/log/snort/alert"
+    file_path = "/var/log/snort/snort.alert.fast"
     threshold_minutes = 4
     command = ['python3', script_path, file_path, str(threshold_minutes)]
     Popen(command, stdout=DEVNULL, stderr=DEVNULL)
@@ -30,7 +30,7 @@ scheduler.start()
 @app.get("/get_alerts")
 async def get_alerts():
     alert_list = []
-    with open("/var/log/snort/alert", "r") as f:
+    with open("/var/log/snort/snort.alert.fast", "r") as f:
         for line in f:
             pattern = r'(\d{2}\/\d{1,2}-\d{2}:\d{2}:\d{2}\.\d{6}).{10}(\d+).+?\]\s(.*?)\s\[\*{2}\]\s\[Classification:\s(.*?)\]\s\[Priority:\s(.*?)\]\s\{(.*?)\}\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)\s->\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)'
             matches = re.match(pattern, line)
