@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
-from subprocess import Popen, DEVNULL
 
 app = FastAPI()
 
@@ -86,12 +85,16 @@ async def get_count():
 async def get_current_threat_level():
     current_time = datetime.now()
     ten_minutes_ago = current_time - timedelta(minutes=1)
+    P1_Count = 0
+    P2_Count = 0
     threat_value = 0
     alerts = await get_alerts()
     for alert in alerts:
         if ten_minutes_ago <= datetime.fromisoformat(alert["timestamp"]):
             if alert["priority"] == "1":
-                threat_value = threat_value + 2
+                P1_Count += 1
             elif alert["priority"] == "2":
-                threat_value = threat_value + 1
-    return threat_value
+                P2_Count += 1
+    threat_value = round(((P1_Count / 30) * 100) + ((P2_Count / 1300) * 10))
+    bounded_threat_value = min(max(threat_value, 0), 100)
+    return bounded_threat_value
