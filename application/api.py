@@ -21,6 +21,7 @@ def remove_old_alerts():
     file_path = "/var/log/snort/alert"
     threshold_minutes = 4
     command = ['python3', script_path, file_path, str(threshold_minutes)]
+    print("Cleaning up old alerts...")
     Popen(command, stdout=DEVNULL, stderr=DEVNULL)
 
 scheduler = BackgroundScheduler()
