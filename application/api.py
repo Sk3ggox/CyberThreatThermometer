@@ -16,16 +16,19 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-def remove_old_alerts():
-    script_path = "/home/student/CyberThreatThermometer/application/remove_lines.py"
-    file_path = "/var/log/snort/alert"
-    threshold_minutes = 4
-    command = ['python3', script_path, file_path, str(threshold_minutes)]
-    print("Cleaning up old alerts...")
-    Popen(command, stdout=DEVNULL, stderr=DEVNULL)
+def remove_lines():
+    threshold_time = datetime.now() - timedelta(minutes=4)
+    print(threshold_time)
+    pattern = r'(\d{2}\/\d{1,2}-\d{2}:\d{2}:\d{2}\.\d{6}).*'
+    
+    with open("/var/log/snort/alert", "r") as file, open("/var/log/snort/alert", "w") as file_write:
+        for line in file:
+            timestamp = datetime.strptime(str(datetime.now().year) + "/" + re.match(pattern, line).group(1), "%Y/%m/%d-%H:%M:%S.%f").isoformat()
+            if timestamp > threshold_time.isoformat():
+                file_write.write(line)
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(remove_old_alerts, 'interval', minutes=1)
+scheduler.add_job(remove_lines, 'interval', minutes=1)
 scheduler.start()
 
 @app.get("/get_alerts")
