@@ -2,6 +2,8 @@ import re
 from datetime import datetime, timedelta
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.background import BackgroundScheduler
+from subprocess import Popen, DEVNULL
 
 app = FastAPI()
 
@@ -13,6 +15,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+def remove_old_alerts():
+    script_path = "/home/student/CyberThreatThermometer/application/remove_lines.py"
+    file_path = "/var/log/snort/alert"
+    threshold_minutes = 4
+    command = ['python3', script_path, file_path, str(threshold_minutes)]
+    Popen(command, stdout=DEVNULL, stderr=DEVNULL)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(remove_old_alerts, 'interval', minutes=1)
+scheduler.start()
 
 @app.get("/get_alerts")
 async def get_alerts():
